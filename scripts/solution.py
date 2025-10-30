@@ -30,17 +30,15 @@ def get_seniority(title):
         return 1
     return 2
 
-
-def build_graph_with_features(employees_df, connections_df):
-    print("Step 1: Building features and graph...")
+def build_graph_with_features(employees_df, connections_df, model=None, batch_size=128):
+    start = time.perf_counter()
     employees_df["combined_text"] = (
         employees_df["job_title_current"].fillna("") + ". " +
         employees_df["profile_summary"].fillna("")
     )
-    model = SentenceTransformer("all-MiniLM-L6-v2")
+    model = model or SentenceTransformer("all-MiniLM-L6-v2")
     texts = employees_df["combined_text"].tolist()
-    print("Encoding embeddings in batches...")
-    embeddings = model.encode(texts, batch_size=128, show_progress_bar=True, convert_to_numpy=True)
+    embeddings = model.encode(texts, batch_size=batch_size, show_progress_bar=False, convert_to_numpy=True)
     norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
     embeddings = embeddings / (norms + 1e-10)
     employees_df["embedding"] = list(embeddings)
@@ -52,10 +50,12 @@ def build_graph_with_features(employees_df, connections_df):
         G.nodes[row["employee_id"]]["embedding"] = row["embedding"]
         G.nodes[row["employee_id"]]["seniority_score"] = row["seniority_score"]
         G.nodes[row["employee_id"]]["location"] = row.get("location", None)
+    elapsed = time.perf_counter() - start
+    print(f"build_graph_with_features() completed in {elapsed:.3f}s")
     return G
 
-
 def score_potential_managers(emp_id, G):
+    start = time.perf_counter()
     emp_data = G.nodes[emp_id]
     emp_emb = emp_data["embedding"]
     emp_sen = emp_data["seniority_score"]
@@ -80,34 +80,46 @@ def score_potential_managers(emp_id, G):
             score += WEIGHT_LOCATION_MATCH
         if score > best_score:
             best_score, best_mgr = score, cand
+    elapsed = time.perf_counter() - start
+    print(f"score_potential_managers({emp_id}) completed in {elapsed:.3f}s")
     return best_mgr
 
-
 def predict_managers(G):
+    start = time.perf_counter()
     predictions = {}
     for emp in tqdm(G.nodes(), desc="Predicting managers"):
         mgr = score_potential_managers(emp, G)
         if mgr:
             predictions[emp] = mgr
+    elapsed = time.perf_counter() - start
+    print(f"predict_managers() completed in {elapsed:.3f}s")
     return predictions
 
+def run_prediction_from_dfs(employees_df, connections_df, model=None, batch_size=128):
+    start = time.perf_counter()
+    G = build_graph_with_features(employees_df.copy(), connections_df.copy(), model=model, batch_size=batch_size)
+    manager_predictions = predict_managers(G)
+    predictions_df = pd.DataFrame(manager_predictions.items(), columns=["employee_id", "manager_id"])
+    all_employees_df = employees_df[["employee_id"]]
+    submission_df = pd.merge(all_employees_df, predictions_df, on="employee_id", how="left")
+    submission_df["manager_id"] = submission_df["manager_id"].fillna(0).astype(int)
+    if 358 in submission_df["employee_id"].values:
+        submission_df.loc[submission_df["employee_id"] == 358, "manager_id"] = -1
+    elapsed = time.perf_counter() - start
+    print(f"run_prediction_from_dfs() completed in {elapsed:.3f}s")
+    return submission_df
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--employees_path", default="data/employees.csv")
     parser.add_argument("--connections_path", default="data/connections.csv")
     parser.add_argument("--output_path", default="submission.csv")
+    parser.add_argument("--batch_size", type=int, default=128)
     args = parser.parse_args()
     start = time.perf_counter()
     employees = pd.read_csv(args.employees_path)
     connections = pd.read_csv(args.connections_path)
-    G = build_graph_with_features(employees, connections)
-    manager_predictions = predict_managers(G)
-    predictions_df = pd.DataFrame(manager_predictions.items(), columns=["employee_id", "manager_id"])
-    all_employees_df = employees[["employee_id"]]
-    submission_df = pd.merge(all_employees_df, predictions_df, on="employee_id", how="left")
-    submission_df["manager_id"] = submission_df["manager_id"].fillna(0).astype(int)
-    submission_df.loc[submission_df["employee_id"] == 358, "manager_id"] = -1
+    submission_df = run_prediction_from_dfs(employees, connections, model=None, batch_size=args.batch_size)
     submission_df.to_csv(args.output_path, index=False)
     elapsed = time.perf_counter() - start
     print(f"Processing complete in {elapsed:.3f}s. Saved to {args.output_path}")

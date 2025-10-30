@@ -20,19 +20,19 @@ Your mission is to optimize the core script and build a robust CI/CD pipeline fo
 -   
 **Answers**
 
-**Task 1 – Performance Evaluation**
+**Performance Evaluation**
 
 **Baseline Timings (Before Code Changes)**
 The image below shows the runtime of the original script without optimizations.
 
-![Baseline Timings](evidences/Baseline%20Timings%20without%20Any%20Code%20Changes.jpg)
+![Baseline Timings](evidences/task1/Baseline%20Timings%20without%20Any%20Code%20Changes.jpg)
 
 ---
 
 **Optimized Timings (After Code Changes)**
 The following image shows the improved runtime after applying Task 1 optimizations.
 
-![After Code Changes](evidences/After%20the%20code%20changes.jpg)
+![After Code Changes](evidences/task1/After%20the%20code%20changes.jpg)
 
 **Overall Justification Summary:**
 
@@ -57,6 +57,29 @@ The following image shows the improved runtime after applying Task 1 optimizatio
 -   **Optimize:** Implement changes to reduce the execution time. Pay close attention to:
     -   Preloading the Model on app start instead of loading it every request.
 -   **Goal:** Improvement in time required to execute `./tests/send_request.sh` as measured by `time ./tests/send_request.sh`
+
+**Answers**
+
+| Optimization             | Before                   | After                                                              | Why                                     |
+| ------------------------ | ------------------------ | ------------------------------------------------------------------ | --------------------------------------- |
+| Preload model once       | Load model every request | `MODEL = SentenceTransformer('all-MiniLM-L6-v2')` at app startup   | Removes repeated heavy loading          |
+| Predict in-process       | `subprocess.run(...)`    | Call `build_graph_with_features()` + `predict_managers()` directly | Avoids new Python process → faster      |
+| In-process visualization | `subprocess.run(...)`    | `visualize_sunburst_hierarchy(...)`                                | Removes extra process; faster & cleaner |
+| Safe temp handling       | Manual temp cleanup      | `with tempfile.TemporaryDirectory()`                               | Auto cleanup; no leftover tmp folders   |
+
+**Before Optimization**
+
+**Performance Before: Total Time : 44 Seconds**
+
+![Before Code Changes](evidences/task2/Before%20Code%20Changes.jpg)
+
+
+ **After Optimization**
+
+**Performance After Total Time : 16 Seconds**
+
+![After Code Changes](evidences/task2/After%20Code%20Changes.jpg)
+
 ---
 
 ### 3. Task 3: Create a Dockerfile for the Application

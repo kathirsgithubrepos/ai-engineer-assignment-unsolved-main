@@ -5,6 +5,7 @@ import base64
 import json
 from urllib import request as urlrequest
 import pytest
+import sys
 
 def test_solution_script_runs():
     """
@@ -20,7 +21,7 @@ def test_solution_script_runs():
 
     # Run the solution.py script as a subprocess
     result = subprocess.run(
-        ['python', 'scripts/solution.py',
+        [sys.executable, 'scripts/solution.py',
          '--employees_path', os.path.join(test_data_dir, 'employees.csv'),
          '--connections_path', os.path.join(test_data_dir, 'connections.csv'),
          '--output_path', output_file],
@@ -42,7 +43,7 @@ def test_serving_script():
     Tests if the serving.py script runs and responds to a request.
     """
     # Start the server as a background process
-    server_process = subprocess.Popen(['python', 'serving/serve.py'])
+    server_process = subprocess.Popen([sys.executable, 'serving/serve.py'])
     time.sleep(2)  # Give the server a moment to start
 
     try:

@@ -17,14 +17,14 @@
 ### Baseline Timings (Before Code Changes)
 The image below shows the runtime of the original script without optimizations.
 
-![Baseline Timings](evidences/Baseline%20Timings%20without%20Any%20Code%20Changes.jpg)
+![Baseline Timings](evidences/task1/Baseline%20Timings%20without%20Any%20Code%20Changes.jpg)
 
 ---
 
 ### Optimized Timings (After Code Changes)
 The following image shows the improved runtime after applying Task 1 optimizations.
 
-![After Code Changes](evidences/After%20the%20code%20changes.jpg)
+![After Code Changes](evidences/task1/After%20the%20code%20changes.jpg)
 
 ## Detailed Explanation:
 
