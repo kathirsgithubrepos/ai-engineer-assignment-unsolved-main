@@ -1,0 +1,85 @@
+# Workflow for comparing solutions on pull requests
+name: Compare Solutions on Pull Request
+
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  compare-solutions:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository }}
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        cache: 'pip'
+
+    - name: Install Python Dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Download Data
+      run: |
+        # TODO: Add command to download data from a public URL
+        # For example:
+        # wget -P data/ https://example.com/connections.csv
+        # wget -P data/ https://example.com/employees.csv
+        echo "Data download placeholder"
+
+    - name: Run PR Solution & Evaluate
+      id: pr_eval
+      run: |
+        # TODO: Add commands to run the solution script from the PR and evaluate its performance
+        # This should include:
+        # 1. Running the solution script (e.g., python scripts/solution.py)
+        # 2. Running the evaluation script (e.g., python dependencies/evaluate.py ...)
+        # 3. Parsing the accuracy from the evaluation output and setting it as an environment variable
+        echo "TODO: Run PR solution and evaluate"
+        echo PR_accuracy
+
+    - name: Checkout main branch
+      uses: actions/checkout@v4
+      with:
+        ref: main
+        path: main-branch-solution
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Run Main Branch Solution & Evaluate
+      id: main_eval
+      run: |
+        # TODO: Add commands to run the solution script from the main branch and evaluate its performance
+        # This is similar to the "Run PR Solution & Evaluate" step, but for the main branch code
+        echo "TODO: Run main branch solution and evaluate"
+        echo MAIN_ACCURACY
+
+    - name: Compare Performance
+      id: comparison
+      run: |
+        # TODO: Compare the accuracies of the PR and main branch solutions
+        # Set an environment variable (e.g., IS_BETTER) to "true" or "false" based on the comparison
+        echo "TODO: Compare performance"
+        echo is_better
+
+    - name: Post PR Comment
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          // TODO: Construct a comment to post on the PR with the performance comparison results
+          // This script should use the environment variables set in the previous steps
+          // (e.g., PR_ACCURACY, MAIN_ACCURACY, IS_BETTER)
+          console.log("TODO: Post PR comment");
