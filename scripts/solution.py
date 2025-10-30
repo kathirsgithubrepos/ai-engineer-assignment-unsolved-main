@@ -81,7 +81,7 @@ def score_potential_managers(emp_id, G):
         if score > best_score:
             best_score, best_mgr = score, cand
     elapsed = time.perf_counter() - start
-    print(f"score_potential_managers({emp_id}) completed in {elapsed:.3f}s")
+    #print(f"score_potential_managers({emp_id}) completed in {elapsed:.3f}s")
     return best_mgr
 
 def predict_managers(G):
