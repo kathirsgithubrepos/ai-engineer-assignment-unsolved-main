@@ -1,11 +1,16 @@
-# TODO: Use an official Python runtime as a parent image
+FROM python:3.11-slim
 
-# TODO: Set the working directory in the container
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
 
-# TODO: Copy the dependencies file to the working directory
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential g++ git curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# TODO: Install any needed packages specified in requirements.txt
-
-# TODO: Copy the rest of the application's code
-
-# TODO: Command to run the application
+WORKDIR /app
+COPY requirements.txt ./requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY . .
+EXPOSE 5001
+CMD ["gunicorn", "-b", "0.0.0.0:5001", "--timeout", "180", "--threads", "4", "serving.serve:app"]
