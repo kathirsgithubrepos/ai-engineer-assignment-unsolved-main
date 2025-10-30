@@ -79,24 +79,28 @@ jobs:
       # ----- Comment results on the PR -----
       - name: Comment PR results
         uses: actions/github-script@v7
+        env:
+          PR_SCORE: ${{ steps.eval_pr.outputs.pr_score }}
+          MAIN_SCORE: ${{ steps.eval_main.outputs.main_score }}
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
-            const prScore = Number("${{ steps.eval_pr.outputs.pr_score }}");
-            const mainScore = Number("${{ steps.eval_main.outputs.main_score }}");
+            const prScore = parseFloat(process.env.PR_SCORE);
+            const mainScore = parseFloat(process.env.MAIN_SCORE);
             const verdict = prScore > mainScore
               ? "✔️ Improved"
               : (prScore === mainScore ? "➖ No change" : "❌ Regression");
 
-            const body = `
-      ### Automated Evaluation
-
-      | Metric   | Main | PR |
-      |---------|-----:|---:|
-      | Accuracy | ${mainScore}% | ${prScore}% |
-
-      **Verdict:** ${verdict}
-      `;
+            const lines = [
+              "### 🤖 Automated Evaluation",
+              "",
+              "| Metric | Main | PR |",
+              "|------:|----:|---:|",
+              `| Accuracy | ${mainScore}% | ${prScore}% |`,
+              "",
+              `**Verdict:** ${verdict}`
+            ];
+            const body = lines.join("\n");
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -104,4 +108,6 @@ jobs:
               issue_number: context.issue.number,
               body
             });
+
+
 
