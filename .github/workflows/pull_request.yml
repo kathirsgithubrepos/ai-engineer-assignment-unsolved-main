@@ -11,7 +11,6 @@ permissions:
 jobs:
   evaluate:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
@@ -34,7 +33,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # ----- Run solution on PR branch -----
       - name: Run solution (PR)
         run: |
           python scripts/solution.py \
@@ -49,7 +47,6 @@ jobs:
           PR=$(cat accuracy.txt | tr -d '%')
           echo "pr_score=$PR" >> "$GITHUB_OUTPUT"
 
-      # ----- Run solution on main branch in a separate directory -----
       - name: Checkout main into ./main_ref
         uses: actions/checkout@v4
         with:
@@ -76,7 +73,6 @@ jobs:
           MAIN=$(cat accuracy.txt | tr -d '%')
           echo "main_score=$MAIN" >> "$GITHUB_OUTPUT"
 
-      # ----- Comment results on the PR -----
       - name: Comment PR results
         uses: actions/github-script@v7
         env:
