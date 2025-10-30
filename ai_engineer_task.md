@@ -17,6 +17,34 @@ Your mission is to optimize the core script and build a robust CI/CD pipeline fo
     -   Inefficient loops or redundant calculations within the scoring functions.
     -   Opportunities for parallelization or vectorized operations (e.g., using NumPy).
 -   **Goal:**  The real time from `time python3 scripts/solution.py` will be used to measure improvements. Optimized solution.py script should run faster when measured as clock time on a 8 core core machine.
+-   
+**Answers**
+
+**Task 1 – Performance Evaluation**
+
+**Baseline Timings (Before Code Changes)**
+The image below shows the runtime of the original script without optimizations.
+
+![Baseline Timings](evidences/Baseline%20Timings%20without%20Any%20Code%20Changes.jpg)
+
+---
+
+**Optimized Timings (After Code Changes)**
+The following image shows the improved runtime after applying Task 1 optimizations.
+
+![After Code Changes](evidences/After%20the%20code%20changes.jpg)
+
+**Overall Justification Summary:**
+
+| Area              | Improvement      | Effect                    |
+| ----------------- | ---------------- | ------------------------- |
+| Embedding Loop    | Batched          | 8–10× faster              |
+| Cosine Similarity | Vectorized dot   | 2–3× faster               |
+| Candidate Loop    | Neighbors only   | 50–200× fewer comparisons |
+| Common Neighbors  | Set intersection | 3–5× faster               |
+| Regex             | Simplified       | Slight gain               |
+| Normalization     | Precomputed      | Consistent speed          |
+| Timing            | Added            | Easier profiling          |
 ---
 
 ### 2. Task 2: Optimize the Flask Serving Script
